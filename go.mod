@@ -1,4 +1,4 @@
-module webshot
+module webshooter
 
 go 1.23.1
 
