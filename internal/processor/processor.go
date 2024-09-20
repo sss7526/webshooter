@@ -139,6 +139,7 @@ func takeScreenshot(url, filename string) error {
 		chromedp.Navigate(url),
 		chromedp.WaitReady("body"),
 		chromedp.Sleep(5 * time.Second), // Lets images fully load first
+		chromedp.Evaluate(`document.querySelector('.jw8mI')?.remove(); document.querySelector('#KjcHPc)?.remove();`, nil) // Removes googles cookie acceptance splash page block
 		chromedp.FullScreenshot(&buf, 100),
 	)
 
