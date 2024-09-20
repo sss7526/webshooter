@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
-	"webshooter/internal/processor"
-	"webshooter/internal/cli"
+	"webshot/internal/processor"
+	"webshot/internal/cli"
 )
 
 func main() {
-	targets, err := cli.ParseArgs(os.Args)
+	targets, verbose, err := cli.ParseArgs(os.Args)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		cli.PrintHelp()
@@ -16,6 +16,6 @@ func main() {
 	}
 
 	if len(targets) > 0 {
-		processor.ProcessTargets(targets)
+		processor.ProcessTargets(targets, verbose)
 	}
 }
