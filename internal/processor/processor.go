@@ -17,6 +17,7 @@ func ProcessTargets(targets []string) {
 	fmt.Println("Processing targets")
 
 	for _, target := range targets {
+		target = validator.EnsureScheme(target)
 		if validator.IsValidURL(target) {
 			fmt.Printf("Valid URL: %s\n", target)
 
