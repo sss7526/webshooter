@@ -13,7 +13,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func ProcessTargets(targets []string) {
+func ProcessTargets(targets []string, verbose bool) {
 	fmt.Println("Processing targets")
 
 	for _, target := range targets {
@@ -23,7 +23,7 @@ func ProcessTargets(targets []string) {
 
 			filename := generateScreenshotFilename(target)
 
-			err := takeScreenshot(target, filename)
+			err := takeScreenshot(target, filename, verbose)
 
 			if err != nil {
 				log.Printf("Error taking screenshot for %s: %s\n", target, err)
@@ -61,7 +61,7 @@ func saveScreenshotToFile(filepath string, data []byte) error {
 	return nil
 }
 
-func takeScreenshot(url, filename string) error {
+func takeScreenshot(url, filename string, verbose bool) error {
 	keywordsToBlock := []string{"ads", "tracking", "analytics", "adservice", "counter", "track", "guestbook"}
 	
 	blockedURLS := []string{}
@@ -99,31 +99,33 @@ func takeScreenshot(url, filename string) error {
 	}
 
 	chromedp.ListenTargets(ctx, func(ev interfact{}) {
-		switch ev := ev.(type) {
-		case *network.EventRequestWillBeSent:
-			shouldBlock := false
-			badword := ""
-			fmt.Printf("VALIDATING URL: %s\n\n", ev.Request.URL)
-			for _, keyword := range keywordsToBlock {
-				if strings.Contains(ev.Request.URL, keyword) {
-					shouldBlock = true
-					badword = keyword
-					break
+		if verbose {
+			switch ev := ev.(type) {
+			case *network.EventRequestWillBeSent:
+				shouldBlock := false
+				badword := ""
+				fmt.Printf("VALIDATING URL: %s\n\n", ev.Request.URL)
+				for _, keyword := range keywordsToBlock {
+					if strings.Contains(ev.Request.URL, keyword) {
+						shouldBlock = true
+						badword = keyword
+						break
+					}
 				}
-			}
 
-			if shouldBlock {
-				fmt.Printf("BLOCKED Request: %s (contains '%s')\n\n", ev.Request.URL, badword)
-			} else {
-				fmt.Printf("ALLOWED Request URL: %s\n", ev.Request.URL)
-				fmt.Printf("ALLOWED Request METHOD: %s\n", ev.Request.Method)
-				fmt.Printf("ALLOWED Request HEADERS: %s\n\n", ev.Request.Headers)
-			}
+				if shouldBlock {
+					fmt.Printf("BLOCKED Request: %s (contains '%s')\n\n", ev.Request.URL, badword)
+				} else {
+					fmt.Printf("ALLOWED Request URL: %s\n", ev.Request.URL)
+					fmt.Printf("ALLOWED Request METHOD: %s\n", ev.Request.Method)
+					fmt.Printf("ALLOWED Request HEADERS: %s\n\n", ev.Request.Headers)
+				}
 
-		case *networkEventResponseReceived:
-			fmt.Printf("RESPONSE URL: %s\n", ev.Response.URL)
-			fmt.Printf("RESPONSE STATUS: %s\n", ev.Response.Status)
-			fmt.Printf("RESPONSE HEADERS: %s\n\n", ev.Response.Headers)
+			case *networkEventResponseReceived:
+				fmt.Printf("RESPONSE URL: %s\n", ev.Response.URL)
+				fmt.Printf("RESPONSE STATUS: %s\n", ev.Response.Status)
+				fmt.Printf("RESPONSE HEADERS: %s\n\n", ev.Response.Headers)
+			}
 		}
 	})
 
