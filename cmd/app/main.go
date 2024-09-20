@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
-	"webshot/internal/processor"
-	"webshot/internal/cli"
+	"webshooter/internal/processor"
+	"webshooter/internal/cli"
 )
 
 func main() {
