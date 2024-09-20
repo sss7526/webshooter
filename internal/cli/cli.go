@@ -10,6 +10,7 @@ import (
 func ParseArgs(args []string) ([]string, error) {
 	var tergets []string
 	targetsSet := false
+	var verbose bool = false
 
 	if len(args) <= 1 {
 		PrintHelp()
@@ -22,15 +23,17 @@ func ParseArgs(args []string) ([]string, error) {
 		if arg == "--help" || arg == "-h" {
 			PrintHelp()
 			os.Exit(0)
-		}
+		} else if arg == "-v" || arg == "--verbose" {
+			verbose = true
 
-		if arg == "--targets" || arg == "-t" {
+		}
+		} else if arg == "--targets" || arg == "-t" {
 			if targetsSet {
-				return nil, errors.New("the --targets (-t) flag should only be specified once")
+				return nil, verbose, errors.New("the --targets (-t) flag should only be specified once")
 			}
 
 			if i + 1 >= len(args) || strings.HasPrefix(args[i + 1], "-") {
-				return nil, errors.New("no targets specified for --targets (-t)")
+				return nil, verbose, errors.New("no targets specified for --targets (-t)")
 			}
 
 			for i + 1 < len(args) && !strings.HasPrefix(args[i + 1], "-") {
@@ -40,15 +43,15 @@ func ParseArgs(args []string) ([]string, error) {
 
 			targetsSet = true
 		} else {
-			return nil, errors.New("invalid argument: " + arg)
+			return nil, verbose, errors.New("invalid argument: " + arg)
 		}
 	}
 
 	if len(targets) == 0 {
-		return nil, nil
+		return nil, verbose, nil
 	}
 
-	return targets, nil
+	return targets, verbose, nil
 }
 
 func PrintHelp() {
