@@ -1,4 +1,4 @@
-APP_NAME := webshot
+APP_NAME := webshooter
 VERSION := 1.0.0
 ARCH := amd64
 BUILD_DIR := build
