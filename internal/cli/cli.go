@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ParseArgs(args []string) ([]string, error) {
+func ParseArgs(args []string) ([]string, bool, error) {
 	var tergets []string
 	targetsSet := false
 	var verbose bool = false
