@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/chromedp/cdproto/network"
+	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 )
 
@@ -57,6 +58,19 @@ func saveScreenshotToFile(filepath string, data []byte) error {
 	err = os.Writefile(filepath, data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write screenshot to file: %v", err)
+	}
+	return nil
+}
+
+func savePDFToFile(filepath string, data []byte) error {
+	err := os.MkdirAll("pdfs", os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("failed to create 'pdfs' direcotyr: %v", err)
+	}
+	filepath = strings.Replace(filepath, ".png", ".pdf", 1)
+	err = os.WriteFile(filepath, data, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write PDF to file: %v", err)
 	}
 	return nil
 }
@@ -130,6 +144,7 @@ func takeScreenshot(url, filename string, verbose bool) error {
 	})
 
 	var buf []byte
+	var pdfBuf []byte
 
 	err = chromedp.Run(ctx,
 		chromedp.ActionFunc(fun(ctx context.Context) error {
@@ -143,6 +158,14 @@ func takeScreenshot(url, filename string, verbose bool) error {
 		chromedp.Sleep(5 * time.Second), // Lets images fully load first
 		chromedp.Evaluate(`document.querySelector('.jw8mI')?.remove(); document.querySelector('#KjcHPc)?.remove();`, nil) // Removes googles cookie acceptance splash page block
 		chromedp.FullScreenshot(&buf, 100),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			pdf, _, err := page.PrintToPDF().WithPrintBackground(true).Do(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to create PDF: %v", err)
+			}
+			pdfBuf = pdf
+			return nil
+		})
 	)
 
 	if err != nil {
@@ -151,5 +174,16 @@ func takeScreenshot(url, filename string, verbose bool) error {
 
 	filepath := fmt.Sprintf("images/%s", filename)
 
-	return saveScreenshotToFile(filepath, buf)
+	err = saveScreenshotToFile(filepath, buf)
+	if err != nil {
+		return err
+	}
+
+	filepath = fmt.Sprintf("pdfs/%s", filename)
+	err = savePDFToFile(filepath, pdfBuf)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
