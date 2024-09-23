@@ -14,7 +14,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func ProcessTargets(targets []string, verbose, saveToImage, saveToPDF bool) {
+func ProcessTargets(targets []string, verbose, saveToImage, saveToPDF, translate bool) {
 	fmt.Println("Processing targets")
 
 	for _, target := range targets {
@@ -25,7 +25,7 @@ func ProcessTargets(targets []string, verbose, saveToImage, saveToPDF bool) {
 			filename := generateScreenshotFilename(target)
 
 			if saveToImage || saveToPDF {
-				err := processScreenshotsAndPDFs(target, filename, verbose, saveToImage, saveToPDF)
+				err := processScreenshotsAndPDFs(target, filename, verbose, saveToImage, saveToPDF, translate)
 
 				if err != nil {
 					log.Printf("Error taking screenshot for %s: %s\n", target, err)
@@ -77,7 +77,7 @@ func savePDFToFile(filepath string, data []byte) error {
 	return nil
 }
 
-func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveToPDF bool) error {
+func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveToPDF, translate bool) error {
 	keywordsToBlock := []string{"ads", "tracking", "analytics", "adservice", "counter", "track", "guestbook"}
 	
 	blockedURLS := []string{}
@@ -163,6 +163,10 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 
 	if err != nil {
 		return err
+	}
+
+	if translate {
+		fmt.Println("Translating isn't supported yet...")
 	}
 
 	if saveToImage {
