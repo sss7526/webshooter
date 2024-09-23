@@ -31,7 +31,12 @@ func main() {
 		verbose = true
 	}
 
+	translate, ok := parsedArgs["translate"].(bool)
+	if !ok && !translate {
+		translate = false
+	}
+
 	if len(targets) > 0 {
-		processor.ProcessTargets(targets, verbose, saveToImage, saveToPDF)
+		processor.ProcessTargets(targets, verbose, saveToImage, saveToPDF, translate)
 	}
 }
