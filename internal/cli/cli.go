@@ -16,6 +16,7 @@ func ParseArgs() (map[string]interface{}) {
 	parser.AddArgument("targets", "t", "targets", "Space separated list of one or more target URLs", "[]string", true)
 	parser.AddArgument("pdf", "p", "pdf", "If specified, saves PDF copy of target webpage", "bool", false)
 	parser.AddArgument("image", "i", "image", "If specified, saves screenshot of target webpage as a PNG", "bool", false)
+	parser.AddArgument("translate", "T", "translate", "If specified, translates the target webpage before capture", "bool", false)
 
 	parsedArgs, shouldExit, err := parser.Parse()
 	if err != nil {
