@@ -1,69 +1,33 @@
 package cli
 
 import (
-	"errors"
 	"fmt"
 	"os"
-	"strings"
+	"github.com/sss7526/goparse"
 )
 
-func ParseArgs(args []string) ([]string, bool, error) {
-	var tergets []string
-	targetsSet := false
-	var verbose bool = false
+func ParseArgs() (map[string]interface{}) {
+	parser := goparse.NewParser(
+		goparse.WithName("Webshooter"),
+		goparse.WithDescription("CLI utility to take screenshots and save PDFs of target web pages"),
+	)
 
-	if len(args) <= 1 {
-		PrintHelp()
+	parser.AddArgument("verbose", "v", "verbose", "Increase verbosity, shows http requests/responses and allowed/blocked status", "bool", false)
+	parser.AddArgument("targets", "t", "targets", "Space separated list of one or more target URLs", "[]string", true)
+	parser.AddArgument("pdf", "p", "pdf", "If specified, saves PDF copy of target webpage", "bool", false)
+	parser.AddArgument("image", "i", "image", "If specified, saves screenshot of target webpage as a PNG", "bool", false)
+
+	parsedArgs, shouldExit, err := parser.Parse()
+	if err != nil {
+		fmt.Printf("Error parsing arguments: %v\n", err)
+		if shouldExit {
+			os.Exit(1)
+		}
+	}
+
+	if shouldExit {
 		os.Exit(0)
 	}
 
-	for i := 1; i < len(args); i++ {
-		arg := args[i]
-
-		if arg == "--help" || arg == "-h" {
-			PrintHelp()
-			os.Exit(0)
-		} else if arg == "-v" || arg == "--verbose" {
-			verbose = true
-
-		}
-		} else if arg == "--targets" || arg == "-t" {
-			if targetsSet {
-				return nil, verbose, errors.New("the --targets (-t) flag should only be specified once")
-			}
-
-			if i + 1 >= len(args) || strings.HasPrefix(args[i + 1], "-") {
-				return nil, verbose, errors.New("no targets specified for --targets (-t)")
-			}
-
-			for i + 1 < len(args) && !strings.HasPrefix(args[i + 1], "-") {
-				i++
-				targets = append(targets, args[i])
-			}
-
-			targetsSet = true
-		} else {
-			return nil, verbose, errors.New("invalid argument: " + arg)
-		}
-	}
-
-	if len(targets) == 0 {
-		return nil, verbose, nil
-	}
-
-	return targets, verbose, nil
-}
-
-func PrintHelp() {
-	helpMessage := `
-Usage: goshot [OPTIONS]
-
-Options:
-    -h, --help        Show this help message and exit
-    -t, --targets     Specify one or more targets. Example:
-
-                      goshot --targets target1 target2 target3
-`
-
-	fmt.Println(helpMessage)
+	return parsedArgs
 }
