@@ -3,7 +3,7 @@ package processor
 import (
 	"context"
 	"fmt"
-	"webshot/internal/validator"
+	"webshooter/internal/validator"
 	"log"
 	"os"
 	"strings"
