@@ -1,21 +1,37 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"webshooter/internal/processor"
 	"webshooter/internal/cli"
 )
 
 func main() {
-	targets, verbose, err := cli.ParseArgs(os.Args)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error:", err)
-		cli.PrintHelp()
-		os.Exit(1)
+	parsedArgs := cli.ParseArgs()
+
+	targets := parsedArgs["targets"].([]string)
+
+	saveToImage, ok := parsedArgs["image"].(bool)
+	if !ok && !saveToImage {
+		saveToImage = false
+	} else {
+		saveToImage = true
+	}
+
+	saveToPDF, ok := parsedArgs["pdf"].(bool)
+	if !ok && !saveToPDF {
+		saveToPDF = false
+	} else {
+		saveToPDF = true
+	}
+
+	verbose, ok := parsedArgs["verbose"].(bool)
+	if !ok && !verbose {
+		verbose = false
+	} else {
+		verbose = true
 	}
 
 	if len(targets) > 0 {
-		processor.ProcessTargets(targets, verbose)
+		processor.ProcessTargets(targets, verbose, saveToImage, saveToPDF)
 	}
 }
