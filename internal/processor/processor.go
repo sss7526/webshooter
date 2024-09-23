@@ -14,7 +14,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func ProcessTargets(targets []string, verbose bool) {
+func ProcessTargets(targets []string, verbose, saveToImage, saveToPDF bool) {
 	fmt.Println("Processing targets")
 
 	for _, target := range targets {
@@ -24,12 +24,14 @@ func ProcessTargets(targets []string, verbose bool) {
 
 			filename := generateScreenshotFilename(target)
 
-			err := takeScreenshot(target, filename, verbose)
+			if saveToImage || saveToPDF {
+				err := processScreenshotsAndPDFs(target, filename, verbose, saveToImage, saveToPDF)
 
-			if err != nil {
-				log.Printf("Error taking screenshot for %s: %s\n", target, err)
-			} else {
-				fmt.Printf("Screenshot saved: %s\n", filename)
+				if err != nil {
+					log.Printf("Error taking screenshot for %s: %s\n", target, err)
+				} else {
+					fmt.Printf("Processed: %s\n", filename)
+				}
 			}
 		} else {
 			fmt.Printf("Invalid URL: %s\n", target)
@@ -40,7 +42,7 @@ func ProcessTargets(targets []string, verbose bool) {
 func generateScreenshotFilename(url string) string {
 	timestamp := time.Now().UTC().Format("20060102_150405")
 	sanitizedURL := sanitizeFilename(url)
-	filename := fmt.Sprintf("%s_%s_screenshot.png", sanitizedURL, timestamp)
+	filename := fmt.Sprintf("%s_%s_output", sanitizedURL, timestamp)
 	return filename
 }
 
@@ -67,7 +69,7 @@ func savePDFToFile(filepath string, data []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to create 'pdfs' direcotyr: %v", err)
 	}
-	filepath = strings.Replace(filepath, ".png", ".pdf", 1)
+
 	err = os.WriteFile(filepath, data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write PDF to file: %v", err)
@@ -75,7 +77,7 @@ func savePDFToFile(filepath string, data []byte) error {
 	return nil
 }
 
-func takeScreenshot(url, filename string, verbose bool) error {
+func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveToPDF bool) error {
 	keywordsToBlock := []string{"ads", "tracking", "analytics", "adservice", "counter", "track", "guestbook"}
 	
 	blockedURLS := []string{}
@@ -156,33 +158,47 @@ func takeScreenshot(url, filename string, verbose bool) error {
 		chromedp.Navigate(url),
 		chromedp.WaitReady("body"),
 		chromedp.Sleep(5 * time.Second), // Lets images fully load first
-		chromedp.Evaluate(`document.querySelector('.jw8mI')?.remove(); document.querySelector('#KjcHPc)?.remove();`, nil) // Removes googles cookie acceptance splash page block
-		chromedp.FullScreenshot(&buf, 100),
-		chromedp.ActionFunc(func(ctx context.Context) error {
-			pdf, _, err := page.PrintToPDF().WithPrintBackground(true).Do(ctx)
-			if err != nil {
-				return fmt.Errorf("failed to create PDF: %v", err)
-			}
-			pdfBuf = pdf
-			return nil
-		})
+		chromedp.Evaluate(`document.querySelector('.jw8mI')?.remove(); document.querySelector('#KjcHPc)?.remove();`, nil), // Removes googles cookie acceptance splash page block
 	)
 
 	if err != nil {
 		return err
 	}
 
-	filepath := fmt.Sprintf("images/%s", filename)
-
-	err = saveScreenshotToFile(filepath, buf)
-	if err != nil {
-		return err
+	if saveToImage {
+		err := chromedp.Run(ctx,
+			chromedp.FullScreenshot(&buf, 100),
+		)
+		if err != nil {
+			return fmt.Errorf("failed to take screenshot: %v", err)
+		}
+		filepath := fmt.Sprintf("images/%s.png", filename)
+		err = saveScreenshotToFile(filepath, buf)
+		if err != nil {
+			return fmt.Errorf("failed to save screenshot: %v", err)
+		}
 	}
 
-	filepath = fmt.Sprintf("pdfs/%s", filename)
-	err = savePDFToFile(filepath, pdfBuf)
-	if err != nil {
-		return err
+	if saveToPDF {
+		err := chromedp.Run(ctx,
+			chromedp.ActionFunc(func(ctx context.Context) error {
+				pdfData, _, err := page.PrintToPDF().WithPrintBackground(true).Do(ctx)
+				if err != nil {
+					return fmt.Errorf("failed to create PDF: %v", err)
+				}
+				pdfBuf = pdfData
+				return nil
+			}),
+		)
+		if err != nil {
+			return fmt.Errorf("failed to create PDF: %v", err)
+		}
+
+		filepath := fmt.Sprintf("pdfs/%s.pdf", filename)
+		err = savePDFToFile(filepath, pdfBuf)
+		if err != nil {
+			return fmt.Errorf("failed to save PDF: %v", err)
+		}
 	}
 
 	return nil
