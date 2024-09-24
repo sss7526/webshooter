@@ -8,13 +8,14 @@ import (
 	"os"
 	"strings"
 	"time"
+	"net"
 
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 )
 
-func ProcessTargets(targets []string, verbose, saveToImage, saveToPDF, translate bool) {
+func ProcessTargets(targets []string, verbose, saveToImage, saveToPDF, translate, useTorProxy bool) {
 	fmt.Println("Processing targets")
 
 	for _, target := range targets {
@@ -25,7 +26,7 @@ func ProcessTargets(targets []string, verbose, saveToImage, saveToPDF, translate
 			filename := generateScreenshotFilename(target)
 
 			if saveToImage || saveToPDF {
-				err := processScreenshotsAndPDFs(target, filename, verbose, saveToImage, saveToPDF, translate)
+				err := processScreenshotsAndPDFs(target, filename, verbose, saveToImage, saveToPDF, translate, useTorProxy)
 
 				if err != nil {
 					log.Printf("Error taking screenshot for %s: %s\n", target, err)
@@ -77,7 +78,7 @@ func savePDFToFile(filepath string, data []byte) error {
 	return nil
 }
 
-func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveToPDF, translate bool) error {
+func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveToPDF, translate, useTorProxy bool) error {
 	keywordsToBlock := []string{"ads", "tracking", "analytics", "adservice", "counter", "track", "guestbook"}
 	
 	blockedURLS := []string{}
@@ -85,8 +86,15 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 		blockedURLS = append(blockedURLS, fmt.Sprintf("*%s*", keyword))
 	}
 
-	userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebkit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-	referrer := "https://www.google.com"
+	var userAgent string
+	var referrer string
+	if !useTorProxy {
+		userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebkit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+		referrer = "https://www.google.com"
+	} else {
+		userAgent = "Mozilla/5.0 (Windows NT 10.0; rv:109.0) Gecko/20100101 Firefox/115.0"
+		referrer = ""
+	}
 
 	opts := append(
 		chromedp.DefaultExecAllocatorOptions[:],
@@ -96,6 +104,26 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 		chromedp.Flag("no-sandbox", true),
 		chromedp.Flag("ignore-certificate-errors", true),
 	)
+
+	if useTorProxy {
+		err := resetTorCircuit()
+		if err != nil {
+			return fmt.Errorf("failed to reset Tor circuit: %v", err)
+		}
+		proxyAddr := "socks5://127.0.0.1:9050"
+		opts = append(opts,
+			chromedp.ProxyServer(proxyAddr),
+			chromedp.Flag("keep-alive-for-idle-connections", false)
+		)
+
+		// Check tor connection before attempt
+		conn, err := net.Dial("tcp", "127.0.0.1:9050")
+		if err != nil {
+			conn.Close()
+			return fmt.Errorf("failed to connect to the Tor proxy at %s: %v. Make sure Tor is running", proxyAddr, err)
+		}
+		conn.Close()
+	}
 
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
