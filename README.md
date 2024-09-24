@@ -16,8 +16,8 @@ sudo snap install chromium
 
 # Installation (deb package)
 
+[Download the latest release here](https://github.com/sss7526/webshooter/releases/tag/1.0.0)
 ```
-wget https://github.com/sss7526/webshooter/releases/latest/download/1.0.0/webshooter_1.0.0_amd64.deb
 sudo apt install ./webshooter_1.0.0_amd64.deb
 ```
 
