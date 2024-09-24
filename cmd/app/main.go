@@ -1,8 +1,8 @@
 package main
 
 import (
-	"webshooter/internal/processor"
-	"webshooter/internal/cli"
+	"github.com/sss7526/webshooter/internal/processor"
+	"github.com/sss7526/webshooter/internal/cli"
 )
 
 func main() {

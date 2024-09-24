@@ -3,7 +3,7 @@ package processor
 import (
 	"context"
 	"fmt"
-	"webshooter/internal/validator"
+	"github.com/sss7526/webshooter/internal/validator"
 	"log"
 	"os"
 	"strings"
@@ -47,7 +47,7 @@ func generateScreenshotFilename(url string) string {
 }
 
 func sanitizeFilename(url string) string {
-	replace := strings.NewReplacer("http://", "", "https://", "", "/", "_", ":", "", "?", "", "&", "", "=", "")
+	replacer := strings.NewReplacer("http://", "", "https://", "", "/", "_", ":", "", "?", "", "&", "", "=", "")
 	return replacer.Replace(url)
 }
 
@@ -57,7 +57,7 @@ func saveScreenshotToFile(filepath string, data []byte) error {
 		return fmt.Errorf("failed to create 'images' directory: %v", err)
 	}
 
-	err = os.Writefile(filepath, data, 0644)
+	err = os.WriteFile(filepath, data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write screenshot to file: %v", err)
 	}
@@ -111,10 +111,10 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 		network.SetBlockedURLS(blockedURLS),
 	)
 	if err != nil {
-		return fmt.Error("failed to enable network events with blocked URLs: %w", err)
+		return fmt.Errorf("failed to enable network events with blocked URLs: %w", err)
 	}
 
-	chromedp.ListenTargets(ctx, func(ev interfact{}) {
+	chromedp.ListenTarget(ctx, func(ev interface{}) {
 		if verbose {
 			switch ev := ev.(type) {
 			case *network.EventRequestWillBeSent:
@@ -137,9 +137,9 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 					fmt.Printf("ALLOWED Request HEADERS: %s\n\n", ev.Request.Headers)
 				}
 
-			case *networkEventResponseReceived:
+			case *network.EventResponseReceived:
 				fmt.Printf("RESPONSE URL: %s\n", ev.Response.URL)
-				fmt.Printf("RESPONSE STATUS: %s\n", ev.Response.Status)
+				fmt.Printf("RESPONSE STATUS: %d\n", ev.Response.Status)
 				fmt.Printf("RESPONSE HEADERS: %s\n\n", ev.Response.Headers)
 			}
 		}
@@ -149,7 +149,7 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 	var pdfBuf []byte
 
 	err = chromedp.Run(ctx,
-		chromedp.ActionFunc(fun(ctx context.Context) error {
+		chromedp.ActionFunc(func(ctx context.Context) error {
 			headers := make(map[string]interface{})
 			headers["Referer"] = referrer
 

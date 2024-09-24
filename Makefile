@@ -26,7 +26,7 @@ package: build
 	echo "Priority: optional" >> $(PACKAGING_DIR)/DEBIAN/control
 	echo "Architecture: $(ARCH)" >> $(PACKAGING_DIR)/DEBIAN/control
 	echo "Maintainer: nunyabidnis" >> $(PACKAGING_DIR)/DEBIAN/control
-	echo "Description: CLI utility to take screenshots of target web URLs using a headless browser" >> $(PACKAGING_DIR)/DEBIAN/control
+	echo "Description: CLI utility to take screenshots and PDFs of target webpages using a headless browser" >> $(PACKAGING_DIR)/DEBIAN/control
 	echo " see above" >> $(PACKAGING_DIR)/DEBIAN/control
 
 	@echo "==> Building .deb package..."
