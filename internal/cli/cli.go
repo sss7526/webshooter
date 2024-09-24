@@ -17,6 +17,10 @@ func ParseArgs() (map[string]interface{}) {
 	parser.AddArgument("pdf", "p", "pdf", "If specified, saves PDF copy of target webpage", "bool", false)
 	parser.AddArgument("image", "i", "image", "If specified, saves screenshot of target webpage as a PNG", "bool", false)
 	parser.AddArgument("translate", "T", "translate", "If specified, translates the target webpage before capture", "bool", false)
+	parser.AddArgument("tor", "P", "proxy", "If specified, connect to target over Tor (Tor must be installed and running)", "bool", false)
+	parser.AddArgument("file", "f", "file", "Reads in target URLs from file. Cannot be used with --targets (-t) flag", "string", false)
+
+	parser.AddExclusiveGroup([]string{"targets", "file"}, false)
 
 	parsedArgs, shouldExit, err := parser.Parse()
 	if err != nil {
