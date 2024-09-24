@@ -66,7 +66,7 @@ func main() {
 	}
 
 	if len(targets) > 0 {
-		processor.ProcessTargets(targets, verbose, saveToImage, saveToPDF, translate)
+		processor.ProcessTargets(targets, verbose, saveToImage, saveToPDF, translate, useTorProxy)
 	} else {
 		fmt.Println("No targets specified")
 	}
