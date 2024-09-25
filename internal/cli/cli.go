@@ -19,8 +19,11 @@ func ParseArgs() (map[string]interface{}) {
 	parser.AddArgument("translate", "T", "translate", "If specified, translates the target webpage before capture", "bool", false)
 	parser.AddArgument("tor", "P", "proxy", "If specified, connect to target over Tor (Tor must be installed and running)", "bool", false)
 	parser.AddArgument("file", "f", "file", "Reads in target URLs from file. Cannot be used with --targets (-t) flag", "string", false)
+	parser.AddArgument("query", "q", "query", "Sends query string to specified search engine", "[]string", false)
+	parser.AddArgument("engine", "e", "engine", "search engine to query against", "string", false)
 
-	parser.AddExclusiveGroup([]string{"targets", "file"}, false)
+	parser.AddExclusiveGroup([]string{"targets", "file", "query"}, true)
+	parser.AddExclusiveGroup([]string{"targets", "engine"}, false)
 
 	parsedArgs, shouldExit, err := parser.Parse()
 	if err != nil {
