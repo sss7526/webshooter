@@ -42,7 +42,7 @@ Restart Tor after editing the torrc file
 
 # Installation (deb package)
 
-[Download the latest release here](https://github.com/sss7526/webshooter/releases/tag/1.0.0)
+[Download the latest release here](https://github.com/sss7526/webshooter/releases/latest)
 ```
 sudo apt install ./webshooter_1.0.0_amd64.deb
 ```
