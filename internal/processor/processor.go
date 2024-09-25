@@ -3,12 +3,13 @@ package processor
 import (
 	"context"
 	"fmt"
-	"github.com/sss7526/webshooter/internal/validator"
 	"log"
+	"net"
 	"os"
 	"strings"
 	"time"
-	"net"
+
+	"github.com/sss7526/webshooter/internal/validator"
 
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/cdproto/page"
@@ -80,7 +81,7 @@ func savePDFToFile(filepath string, data []byte) error {
 
 func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveToPDF, translate, useTorProxy bool) error {
 	keywordsToBlock := []string{"ads", "tracking", "analytics", "adservice", "counter", "track", "guestbook"}
-	
+
 	blockedURLS := []string{}
 	for _, keyword := range keywordsToBlock {
 		blockedURLS = append(blockedURLS, fmt.Sprintf("*%s*", keyword))
@@ -113,7 +114,7 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 		proxyAddr := "socks5://127.0.0.1:9050"
 		opts = append(opts,
 			chromedp.ProxyServer(proxyAddr),
-			chromedp.Flag("keep-alive-for-idle-connections", false)
+			chromedp.Flag("keep-alive-for-idle-connections", false),
 		)
 
 		// Check tor connection before attempt
@@ -134,7 +135,7 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 	ctx, cancel = context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
-	err := chromedp.Run(ctx, 
+	err := chromedp.Run(ctx,
 		network.Enable(),
 		network.SetBlockedURLS(blockedURLS),
 	)
@@ -185,7 +186,7 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 		}),
 		chromedp.Navigate(url),
 		chromedp.WaitReady("body"),
-		chromedp.Sleep(5 * time.Second), // Lets images fully load first
+		chromedp.Sleep(5*time.Second), // Lets images fully load first
 		chromedp.Evaluate(`document.querySelector('.jw8mI')?.remove(); document.querySelector('#KjcHPc)?.remove();`, nil), // Removes googles cookie acceptance splash page block
 	)
 

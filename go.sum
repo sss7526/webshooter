@@ -19,8 +19,8 @@ github.com/mailru/easyjson v0.7.7 h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0
 github.com/mailru/easyjson v0.7.7/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
 github.com/orisano/pixelmatch v0.0.0-20220722002657-fb0b55479cde h1:x0TT0RDC7UhAVbbWWBzr41ElhJx5tXPWkIHA2HWPRuw=
 github.com/orisano/pixelmatch v0.0.0-20220722002657-fb0b55479cde/go.mod h1:nZgzbfBr3hhjoZnS66nKrHmduYNpc34ny7RK4z5/HM0=
-github.com/sss7526/goparse v0.0.0-20240923023141-5d89b0e9acb4 h1:7fxtNnckGTy1qRhoYnSJZFaB+6G415s39WXkaZFJXpA=
-github.com/sss7526/goparse v0.0.0-20240923023141-5d89b0e9acb4/go.mod h1:q3mPSwz9qOfHXIFb0r2UNSnaMYuP9oGaBZqH5CHPhfE=
+github.com/sss7526/goparse v0.0.0-20240924012710-be020382d3c4 h1:P7Na5Nt36QFMQQFbb2mAOLxig96Q1DW1ijaxoDMFu1g=
+github.com/sss7526/goparse v0.0.0-20240924012710-be020382d3c4/go.mod h1:q3mPSwz9qOfHXIFb0r2UNSnaMYuP9oGaBZqH5CHPhfE=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.22.0 h1:RI27ohtqKCnwULzJLqkv897zojh5/DwS/ENaMzUOaWI=
 golang.org/x/sys v0.22.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
