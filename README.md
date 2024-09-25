@@ -11,6 +11,8 @@ CLI utility to save full screenshots and/or PDFs of target webpages using a head
 - Optionally read target list from file
 - Optionally connect to target (including .onion sites) over Tor proxy (Requires Tor to be installed and running)
 
+- Alternative query mode to send query strings to specified search engine, returns and deduplicates search results from first 4 pages
+
 # Dependencies
 You need either Chrome or Chromium browser installed for this to work
 ```
