@@ -99,7 +99,10 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 
 	opts := append(
 		chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.NoDefaultBrowserCheck,
+		chromedp.NoFirstRun,
 		chromedp.UserAgent(userAgent),
+		chromedp.Flag("disable-application-cache", true),
 		chromedp.Flag("headless", true),
 		chromedp.Flag("disable-gpu", true),
 		chromedp.Flag("no-sandbox", true),
@@ -146,6 +149,7 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 	chromedp.ListenTarget(ctx, func(ev interface{}) {
 		if verbose {
 			switch ev := ev.(type) {
+				
 			case *network.EventRequestWillBeSent:
 				shouldBlock := false
 				badword := ""
@@ -180,14 +184,14 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 	err = chromedp.Run(ctx,
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			headers := make(map[string]interface{})
-			headers["Referer"] = referrer
+			headers["referer"] = referrer
 
 			return network.SetExtraHTTPHeaders(network.Headers(headers)).Do(ctx)
 		}),
 		chromedp.Navigate(url),
 		chromedp.WaitReady("body"),
 		chromedp.Sleep(5*time.Second), // Lets images fully load first
-		chromedp.Evaluate(`document.querySelector('.jw8mI')?.remove(); document.querySelector('#KjcHPc)?.remove();`, nil), // Removes googles cookie acceptance splash page block
+		chromedp.Evaluate(`document.querySelector('.jw8mI')?.remove(); document.querySelector('#KjcHPc')?.remove();`, nil), // Removes googles cookie acceptance splash page block
 	)
 
 	if err != nil {

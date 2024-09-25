@@ -27,3 +27,5 @@ build
 .vscode
 *.png
 images
+pdfs
+*.txt
