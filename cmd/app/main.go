@@ -18,6 +18,11 @@ func main() {
 		targets = nil
 	}
 
+	query, ok := parsedArgs["query"].([]string)
+	if !ok && len(query) == 0 {
+		query = nil
+	}
+
 	saveToImage, ok := parsedArgs["image"].(bool)
 	if !ok && !saveToImage {
 		saveToImage = false
@@ -43,6 +48,8 @@ func main() {
 		useTorProxy = false
 	}
 
+	engine, ok := parsedArgs["engine"].(string)
+
 	fmt.Printf("Use Tor Proxy: %v\n", useTorProxy)
 
 	filepath, ok := parsedArgs["file"].(string)
@@ -67,8 +74,10 @@ func main() {
 
 	if len(targets) > 0 {
 		processor.ProcessTargets(targets, verbose, saveToImage, saveToPDF, translate, useTorProxy)
+	} else if len(query) > 0 {
+		processor.Query(query, engine, verbose)
 	} else {
-		fmt.Println("No targets specified")
+		fmt.Println("No targets or queries specified")
 	}
 }
 
