@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/chromedp/chromedp"
 	"github.com/chromedp/cdproto/network"
-	"time",
+	"time"
 	"strings"
 )
 
@@ -129,7 +129,7 @@ func sendQuery(query, engine string, verbose bool) error {
 
 			return network.SetExtraHTTPHeaders(network.Headers(headers)).Do(ctx)
 		}),
-		chromedp.Navigate(url),
+		chromedp.Navigate(searchURL),
 		chromedp.WaitReady("body"),
 		chromedp.Sleep(5*time.Second), // Lets images fully load first
 	)
@@ -157,7 +157,7 @@ func sendQuery(query, engine string, verbose bool) error {
 		}
 
 		links = removeURLsWithKeywords(links, exclusionList)
-		deduplacateLinks(uniqueLinks, links)
+		deduplicateLinks(uniqueLinks, links)
 
 		var nextBtnExists bool
 		err = chromedp.Run(ctx,
