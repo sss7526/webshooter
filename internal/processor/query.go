@@ -27,17 +27,19 @@ func sendQuery(query, engine string, verbose bool) error {
 	fmt.Printf("Engine: %s\n", engine)
 
 	query = strings.Replace(query, " ", "+", -1)
-	exclusionList := []string{"localhost", "search?", "maps?", "webhp?", "privacy?", "terms?", "cookies?", "websearch/answer"}
+	exclusionList := []string{"localhost", "search?", "maps?", "webhp?", "privacy?", "terms?", "cookies?", "websearch/answer", "google", "bing", "duckduckgo"}
 
 	var searchURL string
 	var nextBtn string
 	var nextBtnEval string
 
-	jsScript := `Array.from(document.querySelectorAll('body a')).filter(a => {
-		let parent = a.closest('nav, footer, header, [class*="nav"], [class*="header"], [class*="footer"]');
-		return parent === null;
-	})
-	.map(a => a.href).filter(href => href && href.trim() !== "")`
+	// jsScript := `Array.from(document.querySelectorAll('body a')).filter(a => {
+	// 	let parent = a.closest('nav, footer, header, [class*="nav"], [class*="header"], [class*="footer"]');
+	// 	return parent === null;
+	// })
+	// .map(a => a.href).filter(href => href && href.trim() !== "")`
+
+	jsScript := `Array.from(document.querySelectorAll('body a')).map(a => a.href).filter(href => href && href.trim() !== "")`
 
 	if engine == "google" {
 		searchURL = fmt.Sprintf("https://www.google.com/search?q=%s", query)
@@ -47,6 +49,10 @@ func sendQuery(query, engine string, verbose bool) error {
 		searchURL = fmt.Sprintf("http://localhost:5000/search?q=%s", query)
 		nextBtnEval = `document.querySelector('a[aria-label="Next page"]') !== null`
 		nextBtn = `a[aria-label="Next page"]`
+	} else if engine == "duckduckgo" || engine == "ddg" {
+		searchURL = fmt.Sprintf("https://duckduckgo.com/?q=%s&t=ffab&ia=web", query)
+		nextBtnEval = "document.querySelector('button#more-results') !=== null"
+		nextBtn = "#more-results"
 	} else {
 		return fmt.Errorf("invalid engine: %s", engine)
 	}
