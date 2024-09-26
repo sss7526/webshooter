@@ -51,14 +51,14 @@ func sendQuery(query, engine string, verbose bool) error {
 		return fmt.Errorf("invalid engine: %s", engine)
 	}
 
-	keywordsToBlock := []string{"ads", "tracking", "analytics", "adservice", "counter", "track", "guestbook"}
+	keywordsToBlock := []string{"ads", "tracking", "analytics", "adservice", "counter", "track", "guestbook", "favicon"}
 
 	blockedURLS := []string{}
 	for _, keyword := range keywordsToBlock {
 		blockedURLS = append(blockedURLS, fmt.Sprintf("*%s*", keyword))
 	}
 
-	userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebkit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+	userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebkit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
 	referrer := "https://www.google.com"
 
 	opts := append(
