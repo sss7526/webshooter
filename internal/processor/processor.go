@@ -3,7 +3,7 @@ package processor
 import (
 	"context"
 	"fmt"
-	"log"
+	"sync"
 	"net"
 	"os"
 	"strings"
@@ -16,29 +16,55 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func ProcessTargets(targets []string, verbose, saveToImage, saveToPDF, translate, useTorProxy bool) {
+func ProcessTargets(targets []string, topts *targetOptions) {
 	fmt.Println("Processing targets")
 
+	errChannel := make(chan error, len(targets))
+
+	var wg sync.WaitGroup
+	maxWorkers := 5
+	sem := make(chan struct{}, maxWorkers)
+
 	for _, target := range targets {
-		target = validator.EnsureScheme(target)
-		if validator.IsValidURL(target) {
-			fmt.Printf("Valid URL: %s\n", target)
+		wg.Add(1)
 
-			filename := generateScreenshotFilename(target)
+		go func(t string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
 
-			if saveToImage || saveToPDF {
-				err := processScreenshotsAndPDFs(target, filename, verbose, saveToImage, saveToPDF, translate, useTorProxy)
-
-				if err != nil {
-					log.Printf("Error taking screenshot for %s: %s\n", target, err)
+			t = validator.EnsureScheme(t)
+			if validator.IsValidURL(t) {
+				fmt.Printf("Valid URL: %s\n\n", t)
+	
+				filename := generateScreenshotFilename(t)
+	
+				if topts.saveToImage || topts.saveToPDF {
+					err := processScreenshotsAndPDFs(target, filename, topts)
+	
+					if err != nil {
+						errChannel <- fmt.Errorf("error processing %s: %w", t, err)
+					} else {
+						fmt.Printf("Processed: %s\n\n", filename)
+					}
 				} else {
-					fmt.Printf("Processed: %s\n", filename)
+					fmt.Println("No output format specified.\n")
 				}
+			} else {
+				fmt.Printf("Invalid URL: %s\n\n", t)
 			}
-		} else {
-			fmt.Printf("Invalid URL: %s\n", target)
+		}(target)
+	}
+
+	wg.Wait()
+	close(errChannel)
+	for err := range errChannel {
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
 		}
 	}
+	
+	fmt.Println("Finished processing all targets.")
 }
 
 func generateScreenshotFilename(url string) string {
@@ -79,7 +105,7 @@ func savePDFToFile(filepath string, data []byte) error {
 	return nil
 }
 
-func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveToPDF, translate, useTorProxy bool) error {
+func processScreenshotsAndPDFs(url, filename string, topts *targetOptions) error {
 	keywordsToBlock := []string{"ads", "tracking", "analytics", "adservice", "counter", "track", "guestbook"}
 
 	blockedURLS := []string{}
@@ -89,7 +115,7 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 
 	var userAgent string
 	var referrer string
-	if !useTorProxy {
+	if !topts.useTorProxy {
 		userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebkit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 		referrer = "https://www.google.com"
 	} else {
@@ -109,7 +135,7 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 		chromedp.Flag("ignore-certificate-errors", true),
 	)
 
-	if useTorProxy {
+	if topts.useTorProxy {
 		err := resetTorCircuit()
 		if err != nil {
 			return fmt.Errorf("failed to reset Tor circuit: %v", err)
@@ -147,7 +173,7 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 	}
 
 	chromedp.ListenTarget(ctx, func(ev interface{}) {
-		if verbose {
+		if topts.verbose {
 			switch ev := ev.(type) {
 				
 			case *network.EventRequestWillBeSent:
@@ -202,7 +228,7 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 		fmt.Println("Translating isn't supported yet...")
 	}
 
-	if saveToImage {
+	if topts.saveToImage {
 		err := chromedp.Run(ctx,
 			chromedp.FullScreenshot(&buf, 100),
 		)
@@ -216,7 +242,7 @@ func processScreenshotsAndPDFs(url, filename string, verbose, saveToImage, saveT
 		}
 	}
 
-	if saveToPDF {
+	if topts.saveToPDF {
 		err := chromedp.Run(ctx,
 			chromedp.ActionFunc(func(ctx context.Context) error {
 				pdfData, _, err := page.PrintToPDF().WithPrintBackground(true).Do(ctx)
