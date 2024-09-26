@@ -72,8 +72,16 @@ func main() {
 		defer file.Close()
 	}
 
+	opts := processor.NewTargetOptions {
+		processor.WithVerbose(verbos),
+		processor.WithSaveToImage(saveToImage),
+		processor.WithSaveToPDF(saveToPDF),
+		processor.WithTranslate(translate),
+		processor.WithTorProxy(useTorProxy),
+	}
+
 	if len(targets) > 0 {
-		processor.ProcessTargets(targets, verbose, saveToImage, saveToPDF, translate, useTorProxy)
+		processor.ProcessTargets(targets, opts)
 	} else if len(query) > 0 {
 		processor.Query(query, engine, verbose)
 	} else {
