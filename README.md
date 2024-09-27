@@ -10,6 +10,7 @@ CLI utility to save full screenshots and/or PDFs of target webpages using a head
 - Supports stacking short option flags (ex: -ipPv for image, pdf, tor proxy, and verbose modes respectively)
 - Optionally read target list from file
 - Optionally connect to target (including .onion sites) over Tor proxy (Requires Tor to be installed and running)
+- Multi-threaded
 
 - Alternative query mode to send query strings to specified search engine, returns and deduplicates search results from first 4 pages
 
@@ -58,7 +59,7 @@ output
 ```plaintext
 
 Webshooter
-Version: 1.2.0
+Version: 1.3.1
 
 CLI utility to take screenshots and save PDFs of target web pages.
 Also can run queries against search engines and return the search result URLs.
