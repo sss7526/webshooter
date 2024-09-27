@@ -48,7 +48,7 @@ func main() {
 		useTorProxy = false
 	}
 
-	engine, ok := parsedArgs["engine"].(string)
+	engine, _ := parsedArgs["engine"].(string)
 
 	fmt.Printf("Use Tor Proxy: %v\n", useTorProxy)
 
@@ -72,13 +72,13 @@ func main() {
 		defer file.Close()
 	}
 
-	opts := processor.NewTargetOptions {
-		processor.WithVerbose(verbos),
+	opts := processor.NewTargetOptions (
+		processor.WithVerbose(verbose),
 		processor.WithSaveToImage(saveToImage),
 		processor.WithSaveToPDF(saveToPDF),
 		processor.WithTranslate(translate),
 		processor.WithTorProxy(useTorProxy),
-	}
+	)
 
 	if len(targets) > 0 {
 		processor.ProcessTargets(targets, opts)

@@ -48,7 +48,7 @@ func ProcessTargets(targets []string, topts *targetOptions) {
 						fmt.Printf("Processed: %s\n\n", filename)
 					}
 				} else {
-					fmt.Println("No output format specified.\n")
+					fmt.Println("No output format specified.")
 				}
 			} else {
 				fmt.Printf("Invalid URL: %s\n\n", t)
@@ -224,7 +224,7 @@ func processScreenshotsAndPDFs(url, filename string, topts *targetOptions) error
 		return err
 	}
 
-	if translate {
+	if topts.translate {
 		fmt.Println("Translating isn't supported yet...")
 	}
 

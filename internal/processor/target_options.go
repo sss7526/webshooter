@@ -36,7 +36,7 @@ func WithTranslate(translate bool) option {
 
 func WithTorProxy(useTor bool) option {
 	return func(opts *targetOptions) {
-		opts.translate = translate
+		opts.useTorProxy = useTor
 	}
 }
 
