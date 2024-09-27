@@ -40,7 +40,7 @@ func ProcessTargets(targets []string, topts *targetOptions) {
 				filename := generateScreenshotFilename(t)
 	
 				if topts.saveToImage || topts.saveToPDF {
-					err := processScreenshotsAndPDFs(target, filename, topts)
+					err := processScreenshotsAndPDFs(t, filename, topts)
 	
 					if err != nil {
 						errChannel <- fmt.Errorf("error processing %s: %w", t, err)
