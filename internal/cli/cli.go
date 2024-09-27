@@ -9,7 +9,7 @@ import (
 func ParseArgs() (map[string]interface{}) {
 	parser := goparse.NewParser(
 		goparse.WithName("\nWebshooter"),
-		goparse.WithVersion("1.2.0\n"),
+		goparse.WithVersion("1.3.0\n"),
 		goparse.WithDescription("CLI utility to take screenshots and save PDFs of target web pages.\nAlso can run queries against search engines and return the search result URLs.\nBlocks residual network requests to undesired URLs (trackers, ads, etc).\n"),
 	)
 
@@ -21,7 +21,7 @@ func ParseArgs() (map[string]interface{}) {
 	parser.AddArgument("tor", "P", "proxy", "If specified, connect to target over Tor (Tor must be installed and running)", "bool", false)
 	parser.AddArgument("file", "f", "file", "Reads in target URLs from file. Cannot be used with --targets (-t) flag", "string", false)
 	parser.AddArgument("query", "q", "query", "Sends query string to specified search engine", "[]string", false)
-	parser.AddArgument("engine", "e", "engine", "search engine to query against (google and local instances of whoogle currently supported)", "string", false)
+	parser.AddArgument("engine", "e", "engine", "search engine to query against (google, duckduckgo, and local instances of whoogle currently supported)", "string", false)
 
 	parser.AddExclusiveGroup([]string{"targets", "file", "query"}, true)
 	parser.AddExclusiveGroup([]string{"targets", "engine"}, false)
